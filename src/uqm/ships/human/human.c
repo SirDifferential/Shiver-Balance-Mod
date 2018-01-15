@@ -328,13 +328,26 @@ human_intelligence (ELEMENT *ShipPtr, EVALUATE_DESC *ObjectsOfConcern,
 
 	GetElementStarShip (ShipPtr, &StarShipPtr);
 	if (StarShipPtr->special_counter == 0
-			&& ((ObjectsOfConcern[ENEMY_WEAPON_INDEX].ObjectPtr != NULL
-			&& ObjectsOfConcern[ENEMY_WEAPON_INDEX].which_turn <= 2)
-			|| (ObjectsOfConcern[ENEMY_SHIP_INDEX].ObjectPtr != NULL
-			&& ObjectsOfConcern[ENEMY_SHIP_INDEX].which_turn <= 4)))
+			&& (
+				(
+					ObjectsOfConcern[ENEMY_WEAPON_INDEX].ObjectPtr != NULL &&
+					(
+						ObjectsOfConcern[ENEMY_WEAPON_INDEX].which_turn <= 2 ||
+						(
+							ObjectsOfConcern[ENEMY_WEAPON_INDEX].which_turn <= 4 &&
+							opt_ai_improved
+						)
+					)
+				) || (
+					ObjectsOfConcern[ENEMY_SHIP_INDEX].ObjectPtr != NULL &&
+					ObjectsOfConcern[ENEMY_SHIP_INDEX].which_turn <= 4
+				)
+			)
+	)
 		StarShipPtr->ship_input_state |= SPECIAL;
 	else
 		StarShipPtr->ship_input_state &= ~SPECIAL;
+
 	ObjectsOfConcern[ENEMY_WEAPON_INDEX].ObjectPtr = NULL;
 
 	ship_intelligence (ShipPtr,
@@ -344,7 +357,12 @@ human_intelligence (ELEMENT *ShipPtr, EVALUATE_DESC *ObjectsOfConcern,
 	{
 		if (ObjectsOfConcern[ENEMY_SHIP_INDEX].ObjectPtr
 				&& (!(StarShipPtr->ship_input_state & (LEFT | RIGHT /* | THRUST */))
-				|| ObjectsOfConcern[ENEMY_SHIP_INDEX].which_turn <= 12))
+				|| ObjectsOfConcern[ENEMY_SHIP_INDEX].which_turn <= 12)
+				&& ( 
+					(StarShipPtr->RaceDescPtr->ship_info.energy_level > 12) ||
+					((StarShipPtr->RaceDescPtr->ship_info.energy_level > 8) && !opt_ai_improved)
+				)
+			)
 			StarShipPtr->ship_input_state |= WEAPON;
 	}
 }

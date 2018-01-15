@@ -1013,7 +1013,7 @@ tactical_intelligence (ComputerInputContext *context, STARSHIP *StarShipPtr)
 	COUNT ConcernCounter;
 	EVALUATE_DESC ObjectsOfConcern[10];
 	BOOLEAN ShipMoved, UltraManeuverable;
-	STARSHIP *EnemyStarShipPtr;
+	STARSHIP *EnemyStarShipPtr = NULL;
 	RACE_DESC *RDPtr;
 	RACE_DESC *EnemyRDPtr;
 
@@ -1036,9 +1036,8 @@ tactical_intelligence (ComputerInputContext *context, STARSHIP *StarShipPtr)
 		++StarShipPtr->special_counter;
 
 #ifdef DEBUG_CYBORG
-if (!(ShipPtr->state_flags & FINITE_LIFE)
-		&& ShipPtr->life_span == NORMAL_LIFE)
-	ShipPtr->life_span += 2; /* make ship invulnerable */
+	if (!(ShipPtr->state_flags & FINITE_LIFE) && ShipPtr->life_span == NORMAL_LIFE)
+		ShipPtr->life_span += 2; /* make ship invulnerable */
 #endif /* DEBUG_CYBORG */
 	Ship = *ShipPtr;
 	UnlockElement (StarShipPtr->hShip);
@@ -1315,6 +1314,10 @@ if (!(ShipPtr->state_flags & FINITE_LIFE)
 #ifdef DEBUG_CYBORG
 StarShipPtr->ship_input_state &= ~SPECIAL;
 #endif /* DEBUG_CYBORG */
+
+	if(EnemyStarShipPtr == NULL && StarShipPtr->cur_status_flags&PLAY_VICTORY_DITTY)
+		if(counter_shouldRunAway(StarShipPtr)) 
+			return BATTLE_ESCAPE;
 
 	StarShipPtr->ShipFacing = ShipFacing;
 	{
